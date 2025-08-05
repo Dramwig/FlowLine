@@ -5,7 +5,7 @@ with open("readme_en.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="fline",
-    version="0.1.0",
+    version="0.1.1",
     author="Dramwig",
     author_email="dramwig@gmail.com",
     description="Automated tool for running Python programs in a streamlined manner",
