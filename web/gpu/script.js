@@ -1,5 +1,5 @@
-// API URL
-const API_BASE_URL = 'http://localhost:5000/api';
+// API URL - 动态获取当前host
+const API_BASE_URL = `http://${window.location.hostname}:5000/api`;
 
 // 用于存储数据的变量
 let gpuData = [];
