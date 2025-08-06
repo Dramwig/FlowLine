@@ -43,5 +43,5 @@ setup(
         "werkzeug==2.3",
         "openpyxl"
     ],
-    keywords=["flowline", "fline"],
+    keywords=["flowline", "fline", "machine-learning", "automation", "flash", "gpu", "gpu-monitoring", "experiment-management"],
 )
