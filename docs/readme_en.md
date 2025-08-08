@@ -1,6 +1,12 @@
-# FlowLine
+<div align="center">
+  <img src="./fig/logo.png" width="50%" alt="FlowLine" />
 
-[中文](../readme.md) | English
+  <!-- [![LICENSE](https://badgen.net/static/LICENSE/Apache)](LICENSE) -->
+
+  [中文](../readme.md) | English
+</div>
+
+
 
 FlowLine is an automated system for **GPU resource management** and **concurrent command stream scheduling**, supporting both **Command Line Interface (CLI)** and **Web Graphical User Interface (GUI)** interaction modes. It is suitable for multi-task experiments, deep learning training, or high-concurrency computing environments.
 

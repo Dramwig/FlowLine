@@ -1,6 +1,12 @@
-# FlowLine
+<!-- # FlowLine -->
 
-中文 | [English](./docs/readme_en.md)
+<div align="center">
+  <img src="./docs/fig/logo.png" width="50%" alt="FlowLine" />
+
+  <!-- [![LICENSE](https://badgen.net/static/LICENSE/Apache)](LICENSE) -->
+
+  中文 | [English](./docs/readme_en.md)
+</div>
 
 FlowLine 是一个用于 **GPU资源管理** 和 **并发指令流调度** 的自动化系统，支持 **命令行界面（CLI）** 和 **Web 图形界面（GUI）** 两种交互方式，适用于多任务实验、深度学习训练或高并发计算环境。
 
