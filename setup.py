@@ -9,7 +9,7 @@ if build_timestamp:
 else:
     version = base_version
 
-with open("readme_en.md", "r", encoding="utf-8") as fh:
+with open("docs/readme_en.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setup(
