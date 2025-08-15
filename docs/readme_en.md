@@ -1,6 +1,12 @@
-# FlowLine
+<div align="center">
+  <img src="./fig/logo.png" width="50%" alt="FlowLine" />
 
-[中文](./readme.md) | English
+  <!-- [![LICENSE](https://badgen.net/static/LICENSE/Apache)](LICENSE) -->
+
+  [中文](../readme.md) | English
+</div>
+
+
 
 FlowLine is an automated system for **GPU resource management** and **concurrent command stream scheduling**, supporting both **Command Line Interface (CLI)** and **Web Graphical User Interface (GUI)** interaction modes. It is suitable for multi-task experiments, deep learning training, or high-concurrency computing environments.
 
@@ -38,14 +44,14 @@ pip install -e <path_to_flowline_repository>
 
 > Note: Ensure you have installed basic dependencies from `requirements.txt` (`pandas`, `psutil`, `openpyxl`, etc.).
 
-#### 2. Create Task Control Sheet `todo.xlsx`
+#### 2. Create Task Control Sheet
 
-The system uses an Excel file (`.xlsx` format) to define task parameters. **This is the only input method for all tasks.** Each row represents an independent task, and each column corresponds to a parameter that will be automatically mapped to `--key value` CLI format.
+The system uses a list file (`.xlsx`、 `.csv` or `.json` format) to define task parameters. **This is the only input method for all tasks.** Each row represents an independent task, and each column corresponds to a parameter that will be automatically mapped to `--key value` CLI format.
 
 <details>
 <summary>Example and Explanation</summary>
 
-Example file: [`test/todo.xlsx`](./test/todo.xlsx)
+Example files: [`test/todo.xlsx`](./test/todo.xlsx), [`test/todo.csv`](./test/todo.csv),[`test/todo.json`](./test/todo.json), which can be constructed using the example program [`test/task_builder.py`](./test/task_builder.py).
 
 | *name*    | lr    | batch_size | *run_num* | *need_run_num* | *cmd*       |
 | --------- | ----- | ---------- | --------- | -------------- | ----------- |
@@ -59,7 +65,7 @@ Field descriptions:
 * `cmd`: Reserved field (can be empty or specify main command like `train_main`). Can be used with custom `func` logic.
 * Other fields can be freely defined and will be passed to the command constructor.
 
-> Note: If reserved fields are missing, **the system will auto-complete them during Excel loading** to ensure valid structure.
+> Note: If reserved fields are missing, **the system will auto-complete them during loading** to ensure valid structure.
 
 The flexible task sheet structure supports everything from parameter tuning to complex grid search automation.
 
@@ -112,6 +118,61 @@ Always use `-u` to ensure **real-time log writing** to these files.
 </details>
 </details>
 
+#### 4. Enter `run` to start the task flow
+
+<details>
+<summary>FlowLine CLI Command Reference Table</summary>
+
+| Command        | Parameter                 | Description                                                                                                |
+| -------------- | ------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `run`          | None                      | Toggles the task processing loop state (start/stop)                                                        |
+| `gpu <id>`     | `<id>`: GPU ID            | Toggles the availability of the specified GPU (available/unavailable)                                      |
+| `killgpu <id>` | `<id>`: GPU ID            | Terminates all processes running on the specified GPU                                                      |
+| `kill <id>`    | `<id>`: Process ID        | Terminates the process with the specified process ID                                                       |
+| `ls`           | None                      | Lists all running processes, showing process ID, PID, task ID, GPU ID, status, and command                 |
+| `gpus`         | None                      | Displays the status of all GPUs, including utilization, memory usage, temperature, power consumption, etc. |
+| `min <num>`    | `<num>`: Memory size (MB) | Sets the minimum required memory for processes                                                             |
+| `max <num>`    | `<num>`: Process count    | Sets the maximum number of concurrent processes                                                            |
+| `task`         | None                      | Lists the pending task queue, showing task ID, name, run count, etc.                                       |
+| `exit`         | None                      | Exits the program (equivalent to `Ctrl+D`)                                                                 |
+| `help` or `?`  | None                      | Displays help information                                                                                  |
+
+<details>
+<summary>Command Usage Examples</summary>
+
+```bash
+# Start the task processing loop
+> run
+
+# Check GPU status
+> gpus
+
+# View running processes
+> ls
+
+# Set the maximum number of concurrent processes to 4
+> max 4
+
+# Set the minimum memory requirement to 2048 MB
+> min 2048
+
+# Disable GPU 1
+> gpu 1
+
+# Terminate all processes on GPU 0
+> killgpu 0
+
+# View pending tasks
+> task
+
+# Exit the program
+> exit
+```
+
+</details>
+</details>
+
+
 ### 🌐 Using Web Interface (Visual Task Management)
 
 > **No extra configuration needed - Works directly in SSH environments**
@@ -150,10 +211,33 @@ This project provides **automated detection and utilization of idle GPUs** for r
 - **DO NOT misuse to monopolize shared resources or disrupt others' research.**
 
 ### 🚨 Risk Statement
-> **For learning/research purposes only. Users assume all responsibility.**
 
 Potential risks include but not limited to:
 - Resource conflicts from concurrent scheduling
 - Violation of lab/platform policies if abused
 
 Developers **shall not be liable** for any direct/indirect losses including resource conflicts, account restrictions, or data loss resulting from script usage.
+
+
+## 💐 Contributions
+
+We welcome everyone to contribute code, fix bugs, or improve the documentation for this template!
+
+- If you have any suggestions or questions, please submit an issue.
+- Pull requests are welcome.
+  
+> [!TIP]
+> If this project is helpful to you, please give it a **Star**!
+
+**Thanks to all contributors!**
+
+[![Contributors](https://contrib.rocks/image?repo=dramwig/FlowLine)](https://github.com/dramwig/FlowLine/graphs/contributors)
+
+<a href="https://www.star-history.com/#dramwig/FlowLine&Date">
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=dramwig/FlowLine&type=Date&theme=dark" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=dramwig/FlowLine&type=Date" />
+   
+<img alt="Star History Chart" src="https://api.star-history.com/svg?repos=dramwig/FlowLine&type=Date" />
+ </picture>
+</a>

@@ -1,6 +1,12 @@
-# FlowLine
+<!-- # FlowLine -->
 
-中文 | [English](./readme_en.md)
+<div align="center">
+  <img src="./docs/fig/logo.png" width="50%" alt="FlowLine" />
+
+  <!-- [![LICENSE](https://badgen.net/static/LICENSE/Apache)](LICENSE) -->
+
+  中文 | [English](./docs/readme_en.md)
+</div>
 
 FlowLine 是一个用于 **GPU资源管理** 和 **并发指令流调度** 的自动化系统，支持 **命令行界面（CLI）** 和 **Web 图形界面（GUI）** 两种交互方式，适用于多任务实验、深度学习训练或高并发计算环境。
 
@@ -40,14 +46,14 @@ pip install -e <flowline库路径>
 
 > 注：请确保你已安装 `pandas`、`psutil`、`openpyxl` 等`requirements.txt`内的基本依赖。
 
-#### 2. 编写任务控制表 `todo.xlsx`
+#### 2. 编写任务控制表
 
-系统通过一个 Excel 文件（`.xlsx` 格式）来定义任务参数，**这是所有任务的唯一输入方式**。文件中的每一行代表一个独立任务，每一列对应一个参数项，将自动映射为命令行中的 `--key value` 格式。
+系统通过一个列表文件（`.xlsx`、 `.csv` 或 `.json` 格式）来定义任务参数，**这是所有任务的唯一输入方式**。文件中的每一行代表一个独立任务，每一列对应一个参数项，将自动映射为命令行中的 `--key value` 格式。
 
 <details>
 <summary>示例和说明</summary>
 
-示例文件：[`test/todo.xlsx`](./test/todo.xlsx)
+示例文件：[`test/todo.xlsx`](./test/todo.xlsx)、[`test/todo.csv`](./test/todo.csv)、[`test/todo.json`](./test/todo.json)， 可以通过运行[`test/task_builder.py`](./test/task_builder.py)示例构造程序构造。
 
 | *name*    | lr    | batch\_size |*run\_num*|*need\_run\_num*| *cmd*       |
 | --------- | ----- | ----------- | -------- | -------------- | ----------- |
@@ -62,7 +68,7 @@ pip install -e <flowline库路径>
 * `cmd`：保留字段，当前版本可预留为空或指定主命令（如 `train_main`），可结合 `func` 自定义逻辑使用。
 * 其余字段可自由定义，系统会将这些字段作为参数传入自定义命令构造函数中。
 
-> 注意：如果缺失上述保留字段，**系统会在加载 Excel 时自动补全**，确保表结构合法。
+> 注意：如果缺失上述保留字段，**系统会在加载文件时自动补全**，确保表结构合法。
 
 任务表结构灵活，可覆盖从参数微调到复杂网格搜索的自动并发调度。
 
@@ -97,8 +103,6 @@ if __name__ == "__main__":
 <details>
 <summary>关于输出和python -u</summary>
 
-💡 **关于 `python -u`：**
-
 在命令中加入 `-u` 参数（即 `python -u ...`）表示以 **非缓冲模式（unbuffered mode）** 启动 Python：
 
 * 标准输出（`stdout`）和标准错误（`stderr`）会**立即刷新**；
@@ -118,6 +122,59 @@ log/
 </details>
 </details>
 
+#### 4. 输入`run`开始运行任务流
+
+<details>
+<summary>FlowLine CLI 命令参考表</summary>
+
+| 语法 | 参数 | 功能说明 |
+|------|------|----------|
+| `run` | 无 | 切换任务处理循环的运行状态（启动/停止） |
+| `gpu <id>` | `<id>`: GPU编号 | 切换指定GPU的可用状态（可用/不可用） |
+| `killgpu <id>` | `<id>`: GPU编号 | 终止指定GPU上的所有进程 |
+| `kill <id>` | `<id>`: 进程ID | 终止指定进程ID的进程 |
+| `ls` | 无 | 列出所有正在运行的进程，显示进程ID、PID、任务ID、GPU ID、状态和命令 |
+| `gpus` | 无 | 显示所有GPU的状态信息，包括利用率、内存使用、温度、功耗等 |
+| `min <num>` | `<num>`: 内存大小(MB) | 设置进程所需的最小内存限制 |
+| `max <num>` | `<num>`: 进程数量 | 设置最大并发进程数 |
+| `task` | 无 | 列出待处理任务队列，显示任务ID、名称、运行次数等信息 |
+| `exit` | 无 | 退出程序（等效`Ctrl+D`） |
+| `help` 或 `?` | 无 | 显示帮助信息 |
+
+
+<details>
+<summary>命令使用示例</summary>
+
+```bash
+# 启动任务处理循环
+> run
+
+# 查看GPU状态
+> gpus
+
+# 查看运行中的进程
+> ls
+
+# 设置最大进程数为4
+> max 4
+
+# 设置最小内存要求为2048MB
+> min 2048
+
+# 禁用GPU 1
+> gpu 1
+
+# 终止GPU 0上的所有进程
+> killgpu 0
+
+# 查看待处理任务
+> task
+
+# 退出程序
+> exit
+```
+</details>
+</details>
 
 ### 🌐 使用 Web 界面（可视化任务管理）
 
@@ -164,8 +221,6 @@ python -m http.server 8000
 
 ### 🚨 风险声明
 
-> **本工具仅供学习与研究使用，使用者须自行承担一切后果。**
-
 使用本脚本可能带来的风险包括但不限于：
 
 - 与他人并发调度产生冲突，影响公平使用；
@@ -173,4 +228,23 @@ python -m http.server 8000
 
 开发者对因使用本脚本而导致的**资源冲突、账号受限、数据丢失或任何直接间接损失**概不负责。
 
+## 💐 贡献
 
+欢迎大家为本模板贡献代码、修正bug或完善文档！
+- 如有建议或问题，请提交Issue。
+- 欢迎提交Pull Request。
+
+> [!TIP] 
+> 若对您有帮助，请给这个项目点上 **Star**!
+
+**感谢所有贡献者！**
+
+[![贡献者](https://contrib.rocks/image?repo=dramwig/FlowLine)](https://github.com/dramwig/FlowLine/graphs/contributors)
+
+<a href="https://www.star-history.com/#dramwig/FlowLine&Date">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=dramwig/FlowLine&type=Date&theme=dark" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=dramwig/FlowLine&type=Date" />
+   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=dramwig/FlowLine&type=Date" />
+ </picture>
+</a>
