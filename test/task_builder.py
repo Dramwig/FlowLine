@@ -3,7 +3,7 @@ from tqdm import tqdm
 import pandas as pd
 
 current_path = os.path.dirname(os.path.abspath(__file__))
-todo_excel_path = os.path.join(current_path, "todo.xlsx")
+todo_file_path = os.path.join(current_path, "todo.csv") # `.csv` or `.xlsx` or `.json`
 
 def config_generator():
     """
@@ -42,16 +42,13 @@ def process_configs():
     df['run_num'] = 0
     
     # Save to Excel if file doesn't exist, otherwise load and update
-    if os.path.exists(todo_excel_path):
-        existing_df = pd.read_excel(todo_excel_path)
+    if os.path.exists(todo_file_path):
+        existing_df = pd.read_excel(todo_file_path)
         df = df.merge(existing_df[['data_name', 'model_name', 'method_name', 'domain_num', 'seed', 'run_num']], 
                       on=['data_name', 'model_name', 'method_name', 'domain_num', 'seed', 'run_num'], 
                       how='left')
         # print(df)
         df['run_num'] = df['run_num'].fillna(0)
-    
-    # Save to Excel
-    df.to_excel(todo_excel_path, index=False)
     
     # Process only unrun configurations
     for config in tqdm(configs):
@@ -66,8 +63,15 @@ def process_configs():
                    (df['domain_num'] == config['domain_num']) & 
                    (df['seed'] == config['seed']), 'run_num'] = 0
     
-    df.to_excel(todo_excel_path, index=False)
-
+    # Save to Excel or CSV
+    if todo_file_path.endswith(".xlsx"):
+        df.to_excel(todo_file_path, index=False)
+    elif todo_file_path.endswith(".csv"):
+        df.to_csv(todo_file_path, index=False)
+    elif todo_file_path.endswith(".json"):
+        df.to_json(todo_file_path, orient="records", force_ascii=False, indent=4)
+    else:
+        raise ValueError("Invalid file extension. Please use .xlsx, .csv, or .json.")
 
 if __name__ == "__main__":
     process_configs()

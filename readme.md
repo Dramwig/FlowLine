@@ -46,14 +46,14 @@ pip install -e <flowline库路径>
 
 > 注：请确保你已安装 `pandas`、`psutil`、`openpyxl` 等`requirements.txt`内的基本依赖。
 
-#### 2. 编写任务控制表 `todo.xlsx`
+#### 2. 编写任务控制表
 
-系统通过一个 Excel 文件（`.xlsx` 格式）来定义任务参数，**这是所有任务的唯一输入方式**。文件中的每一行代表一个独立任务，每一列对应一个参数项，将自动映射为命令行中的 `--key value` 格式。
+系统通过一个列表文件（`.xlsx`、 `.csv` 或 `.json` 格式）来定义任务参数，**这是所有任务的唯一输入方式**。文件中的每一行代表一个独立任务，每一列对应一个参数项，将自动映射为命令行中的 `--key value` 格式。
 
 <details>
 <summary>示例和说明</summary>
 
-示例文件：[`test/todo.xlsx`](./test/todo.xlsx)
+示例文件：[`test/todo.xlsx`](./test/todo.xlsx)、[`test/todo.csv`](./test/todo.csv)、[`test/todo.json`](./test/todo.json)， 可以通过运行[`test/task_builder.py`](./test/task_builder.py)示例构造程序构造。
 
 | *name*    | lr    | batch\_size |*run\_num*|*need\_run\_num*| *cmd*       |
 | --------- | ----- | ----------- | -------- | -------------- | ----------- |
@@ -68,7 +68,7 @@ pip install -e <flowline库路径>
 * `cmd`：保留字段，当前版本可预留为空或指定主命令（如 `train_main`），可结合 `func` 自定义逻辑使用。
 * 其余字段可自由定义，系统会将这些字段作为参数传入自定义命令构造函数中。
 
-> 注意：如果缺失上述保留字段，**系统会在加载 Excel 时自动补全**，确保表结构合法。
+> 注意：如果缺失上述保留字段，**系统会在加载文件时自动补全**，确保表结构合法。
 
 任务表结构灵活，可覆盖从参数微调到复杂网格搜索的自动并发调度。
 

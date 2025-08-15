@@ -40,13 +40,13 @@ class TaskManager:
     """
     excel的保留关键字(属性): run_num, need_run_num, name, cmd
     """
-    def __init__(self, excel_path):
+    def __init__(self, task_dir):
         self._lock = threading.Lock()
-        self.excel_path = excel_path
-        logger.info(f"read excel: {excel_path}")
-        self.df = pd.read_excel(excel_path)
+        self.task_dir = task_dir
+        logger.info(f"read excel: {task_dir}")
+        self._read_df()
         self.format_tidy_df()
-        self.df.to_excel(excel_path, index=False)   
+        self._save_df()
 
         self.tasks = []
         self.task_ids = queue.PriorityQueue()
@@ -71,6 +71,26 @@ class TaskManager:
             with self._lock:
                 return func(self, *args, **kwargs)
         return wrapper
+    
+    def _read_df(self):
+        if self.task_dir.endswith(".xlsx"):
+            self.df = pd.read_excel(self.task_dir)
+        elif self.task_dir.endswith(".csv"):
+            self.df = pd.read_csv(self.task_dir)
+        elif self.task_dir.endswith(".json"):
+            self.df = pd.read_json(self.task_dir)
+        else:
+            raise ValueError("Invalid file extension. Please use .xlsx, .csv, or .json.")
+    
+    def _save_df(self):
+        if self.task_dir.endswith(".xlsx"):
+            self.df.to_excel(self.task_dir, index=False)
+        elif self.task_dir.endswith(".csv"):
+            self.df.to_csv(self.task_dir, index=False)
+        elif self.task_dir.endswith(".json"):
+            self.df.to_json(self.task_dir, orient="records", force_ascii=False, indent=4)
+        else:
+            raise ValueError("Invalid file extension. Please use .xlsx, .csv, or .json.")
     
     # -------------------------------
     
@@ -99,7 +119,7 @@ class TaskManager:
     def update_task_ids(self, id):
         self.tasks[id].run_num += 1
         self.df.loc[id, 'run_num'] += 1
-        self.df.to_excel(self.excel_path, index=False)
+        self._save_df()
         logger.info(f"update task {id} run times: {self.df.loc[id, 'run_num']}")
 
     @synchronized
