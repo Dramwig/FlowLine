@@ -44,14 +44,14 @@ pip install -e <path_to_flowline_repository>
 
 > Note: Ensure you have installed basic dependencies from `requirements.txt` (`pandas`, `psutil`, `openpyxl`, etc.).
 
-#### 2. Create Task Control Sheet `todo.xlsx`
+#### 2. Create Task Control Sheet
 
-The system uses an Excel file (`.xlsx` format) to define task parameters. **This is the only input method for all tasks.** Each row represents an independent task, and each column corresponds to a parameter that will be automatically mapped to `--key value` CLI format.
+The system uses a list file (`.xlsx`、 `.csv` or `.json` format) to define task parameters. **This is the only input method for all tasks.** Each row represents an independent task, and each column corresponds to a parameter that will be automatically mapped to `--key value` CLI format.
 
 <details>
 <summary>Example and Explanation</summary>
 
-Example file: [`test/todo.xlsx`](./test/todo.xlsx)
+Example files: [`test/todo.xlsx`](./test/todo.xlsx), [`test/todo.csv`](./test/todo.csv),[`test/todo.json`](./test/todo.json), which can be constructed using the example program [`test/task_builder.py`](./test/task_builder.py).
 
 | *name*    | lr    | batch_size | *run_num* | *need_run_num* | *cmd*       |
 | --------- | ----- | ---------- | --------- | -------------- | ----------- |
@@ -65,7 +65,7 @@ Field descriptions:
 * `cmd`: Reserved field (can be empty or specify main command like `train_main`). Can be used with custom `func` logic.
 * Other fields can be freely defined and will be passed to the command constructor.
 
-> Note: If reserved fields are missing, **the system will auto-complete them during Excel loading** to ensure valid structure.
+> Note: If reserved fields are missing, **the system will auto-complete them during loading** to ensure valid structure.
 
 The flexible task sheet structure supports everything from parameter tuning to complex grid search automation.
 
