@@ -14,9 +14,9 @@ from flowline.utils import Log
 logger = Log(__name__)
 
 class ProgramManager:
-    def __init__(self, user_func, task_dir):
+    def __init__(self, user_func, task_dir, user_cmp=None):
         self._lock = threading.Lock()
-        self.gpu_manager = GPU_Manager([0], self.on_gpu_flash)
+        self.gpu_manager = GPU_Manager([0], self.on_gpu_flash, user_cmp)
         self.process_manager = ProcessManager(self.on_process_changed)
         self.task_manager = TaskManager(task_dir)
         
@@ -59,7 +59,7 @@ class ProgramManager:
         if not self.process_manager.have_space():
             logger.info(f"over max processes")
             return
-        gpu_id = self.gpu_manager.choose_gpu()
+        gpu_id, sorted_gpu_ids = self.gpu_manager.choose_gpu()
         if gpu_id is None:
             logger.info(f"no available GPU")
             return
@@ -67,7 +67,7 @@ class ProgramManager:
         if task_id is None:
             logger.info("no task to handle")
             return
-        cmd = self.func(dict, gpu_id)
+        cmd = self.func(dict, gpu_id, sorted_gpu_ids)
         process = self.process_manager.add_process(cmd, task_id, gpu_id)
         if process is None:
             self.task_manager.put_task_ids(task_id)

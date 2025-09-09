@@ -14,17 +14,22 @@ FlowLine 是一个用于 **GPU资源管理** 和 **并发指令流调度** 的�
 * 🧩 **系统概要设计**：详见 [概要设计](./docs/design.md)
 * 🏗️ **系统架构详解**：详见 [架构说明](./docs/arch.md)
 
-该系统的设计初衷是为了替代手动监控 GPU 状态并依次执行命令的低效方式。在传统流程中，用户需要持续关注 GPU 的剩余显存和使用情况，以便手动启动 Python 脚本或终止进程，这在多任务实验场景中尤为繁琐。本项目通过自动化机制解决了这些问题，提升了实验效率与资源利用率。
+该系统的设计初衷是为了替代手动监控 GPU 状态并依次执行命令的低效方式。在传统流程中，用户需要持续关注 GPU 的显存占用和利用率，还可能cuda out of memory，以便手动启动 Python 脚本或终止进程，这在多任务实验场景中尤为繁琐。本项目通过自动化机制解决了这些问题，提升了实验效率与资源利用率。
 
-> ~你也不想因为 CUDA Out of Memory 重新手动改sh吧。~
+本系统的设计初衷在于替代传统的手动 GPU 监控与命令执行流程，从而提升实验效率。在传统方式下，用户需持续关注 GPU 的显存占用与利用率，并可能因 CUDA 内存不足（CUDA Out of Memory）而中断任务，需要手动启动或终止 Python 脚本。这种操作在多任务实验场景中尤为繁琐。本项目通过自动化管理机制，提升了实验效率与资源利用率。
 
 ## 核心特性
 
-* 实时 GPU 状态监控：自动检测可用 GPU 数量、显存占用、进程信息等、并选择最恰当的GPU；
+* 实时 GPU 状态监控：自动检测可用 GPU 数量、显存占用、进程信息等、并根据自定义优先函数排序；
+* **报错自动处理**：错误中断后自动重新入队而解决 CUDA Out of Memory 等非程序BUG；
 * 命令调度与资源控制：支持配置每条命令所需 GPU 数量、显存下限、最大并行数等条件；
 * 动态调控机制：可手动终止或重启进程，实现任务队列灵活管理；
 * 多任务并发执行：支持任务优先级队列、失败重试等策略，适用于批量实验运行；
 * 双重交互入口：命令行接口适合在 Linux 服务器上进行脚本化控制与批量部署，Web 界面适合进行任务的可视化查看、状态监控与实时干预。
+
+## Updates
+
+* 2025.09.09: 新增用户自定义 GPU 优先级排序功能，通过 `user_cmp` 参数传入自定义排序函数，详见 [main_cli.py](./main_cli.py) 示例。
 
 ## 🚀 快速使用指南
 
@@ -34,13 +39,13 @@ FlowLine 是一个用于 **GPU资源管理** 和 **并发指令流调度** 的�
 
 你可以将 `flowline` 文件夹拷贝到项目的根目录下直接引用，也可以通过以下方式将其安装到你的 Python 环境中：
 
-- 从pip安装
+* 从pip安装
 
 ```bash
 pip install fline
 ```
 
-- 或者从源代码安装
+* 或者从源代码安装
 
 ```bash
 pip install -e <flowline库路径>
@@ -76,31 +81,61 @@ pip install -e <flowline库路径>
 
 </details>
 
-#### 3. 定义任务构造函数 `func(dict, gpu_id)`
+#### 3. 定义任务构造函数 和 GPU优先级比较函数（可选）
 
 你需要自定义一个函数，用于根据 Excel 中的每一行任务参数 `dict` 以及分配的 GPU 编号 `gpu_id` 构造出最终的命令行字符串。
 
 <details>
 <summary>示例和说明</summary>
 
-例如：
+详见 [main_cli.py](./main_cli.py) 示例。主要部分如下：
 
 ```python
-from flowline import run_cli
+def func(dict, gpu_id, sorted_gpu_ids):
+    print(sorted_gpu_ids)
+    return "CUDA_VISIBLE_DEVICES="+str(gpu_id)+" python -u test/test.py "+ " ".join([f"--{k} {v}" for k, v in dict.items()])
+
+def cmp(info1, info2):
+    if info1.free_memory > info2.free_memory:
+        return -1
+    elif info1.free_memory < info2.free_memory:
+        return 1
+    else:
+        return 0
 
 if __name__ == "__main__":
-    def func(param_dict, gpu_id):
-        cmd = "CUDA_VISIBLE_DEVICES=" + str(gpu_id) + " python -u test/test.py "
-        args = " ".join([f"--{k} {v}" for k, v in param_dict.items()])
-        return cmd + args
-
-    run_cli(func, "test/todo.xlsx")
+    # run_cli(func, "test/todo.csv") 
+    run_cli(func, "test/todo.csv", user_cmp=cmp) # user_cmp可选
 ```
 
-* `param_dict` 是由 Excel 中当前任务行构造出的字典，键为列名，值为单元格内容；
-* `gpu_id` 是系统动态分配的 GPU 编号，保证任务不冲突；
-* 拼接后的命令字符串将作为子进程执行，等效于直接在命令行中执行该命令；
-* 你可以根据实际情况替换为 shell 脚本、conda 环境、主命令变体等。
+* `dict` 是由 Excel 中当前任务行构造出的字典，键为列名，值为单元格内容；
+* `gpu_id` 是系统动态分配的 GPU 编号，保证任务不冲突，其此刻一定满足显存空间最小限制；
+* `sorted_gpu_ids`（可选）是经过优先级排序后的可用 GP U序列，为可能的多 GPU 任务适配；
+* 拼接后的命令字符串将作为子进程执行，等效于直接在命令行中执行该命令。你可以根据实际情况替换为 shell 脚本、conda 环境、主命令变体等。
+
+<details>
+<summary>user_cmp 可用参数表</summary>
+
+info1、info2其实是 [gpu.py](.flowline/core/gpu.py) 的 GPU_info 对象的实例，其可用作比较函数的参数有：
+
+可以用一个 Markdown 表格清晰地表示 `GPU_info` 类中每个参数的含义：
+
+| 参数名             | 类型      | 含义说明                                                      |
+| ------------------ | --------- | ------------------------------------------------------------- |
+| `free_memory`      | int/float | GPU 当前可用显存大小（通常单位为 MB 或 GB）                   |
+| `total_memory`     | int/float | GPU 总显存容量                                                |
+| `utilization`      | int/float | GPU 当前使用率（百分比，0\~100）                              |
+| `user_process_num` | int       | 当前用户进程数量（默认初始化为 0，可统计特定用户的 GPU 进程） |
+| `all_process_num`  | int       | GPU 上运行的所有进程数量                                      |
+| `time`             | float     | 记录信息更新时间的时间戳（UNIX 时间戳格式）                   |
+| `name`             | str       | GPU 名称，如 "NVIDIA GeForce RTX 3090"                        |
+| `temperature`      | int/float | GPU 当前温度（单位通常为摄氏度 °C）                           |
+| `power`            | float     | GPU 当前功耗（单位通常为瓦特 W）                              |
+| `max_power`        | float     | GPU 最大设计功耗（单位瓦特 W）                                |
+
+如果你需要，我可以帮你画一个**可视化示意图**，把 GPU 状态参数和它们的含义一目了然地展示出来，这在文档或汇报中很直观。你希望我画吗？
+
+</details>
 
 <details>
 <summary>关于输出和python -u</summary>
@@ -124,7 +159,13 @@ log/
 </details>
 </details>
 
-#### 4. 输入`run`开始运行任务流
+#### 4. 运行程序后输入`run`开始运行任务流
+
+运行 `main_cli.py` 启动程序：
+
+```bash
+python main_cli.py
+```
 
 <details>
 <summary>FlowLine CLI 命令参考表</summary>
@@ -142,7 +183,6 @@ log/
 | `task` | 无 | 列出待处理任务队列，显示任务ID、名称、运行次数等信息 |
 | `exit` | 无 | 退出程序（等效`Ctrl+D`） |
 | `help` 或 `?` | 无 | 显示帮助信息 |
-
 
 <details>
 <summary>命令使用示例</summary>
@@ -175,6 +215,7 @@ log/
 # 退出程序
 > exit
 ```
+
 </details>
 </details>
 
@@ -203,7 +244,6 @@ python -m http.server 8000
 
 这将在 [http://localhost:8000](http://localhost:8000/) 启动前端服务，前端可通过 RESTful API 访问后端任务状态与控制接口。
 
-
 <div align=center>
   <img src="./docs/fig/gpu.png" alt="Image 1" height="200px" />
   <img src="./docs/fig/task.png" alt="Image 1" height="200px" />
@@ -217,26 +257,27 @@ python -m http.server 8000
 
 ### 📌 使用前须知
 
-- 本项目提供的工具**不会以暴力方式强制杀掉他人任务**，也**不会绕过权限限制或系统调度机制**。
-- 本脚本默认**只在用户拥有访问权限的设备上运行**，请确保遵守所在实验室或计算平台的使用规则。
-- **请勿用于占用公共资源或干扰他人科研工作**，违者后果自负。
+* 本项目提供的工具**不会以暴力方式强制杀掉他人任务**，也**不会绕过权限限制或系统调度机制**。
+* 本脚本默认**只在用户拥有访问权限的设备上运行**，请确保遵守所在实验室或计算平台的使用规则。
+* **请勿用于占用公共资源或干扰他人科研工作**，违者后果自负。
 
 ### 🚨 风险声明
 
 使用本脚本可能带来的风险包括但不限于：
 
-- 与他人并发调度产生冲突，影响公平使用；
-- 若滥用，可能违反实验室/平台管理规定；
+* 与他人并发调度产生冲突，影响公平使用；
+* 若滥用，可能违反实验室/平台管理规定；
 
 开发者对因使用本脚本而导致的**资源冲突、账号受限、数据丢失或任何直接间接损失**概不负责。
 
 ## 💐 贡献
 
 欢迎大家为本模板贡献代码、修正bug或完善文档！
-- 如有建议或问题，请提交Issue。
-- 欢迎提交Pull Request。
 
-> [!TIP] 
+* 如有建议或问题，请提交Issue。
+* 欢迎提交Pull Request。
+
+> [!TIP]
 > 若对您有帮助，请给这个项目点上 **Star**!
 
 **感谢所有贡献者！**

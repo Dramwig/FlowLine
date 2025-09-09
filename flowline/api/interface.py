@@ -129,9 +129,9 @@ class CommandLineInterface(cmd.Cmd):
             print(f"{v['task_id']:<8} {v['name']:<12} {v['run_num']:<8} {v['dict']:<20}")
         print("-" * 100)
 
-def run_cli(func, task_dir=None):
+def run_cli(func, task_dir=None, user_cmp=None):
     """run the command line interface"""
-    program = ProgramManager(func, task_dir)
+    program = ProgramManager(func, task_dir, user_cmp)
     cli = CommandLineInterface(program)
     try:
         cli.cmdloop()

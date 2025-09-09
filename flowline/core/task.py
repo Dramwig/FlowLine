@@ -65,7 +65,7 @@ class TaskManager:
             self.df['name'] = ['Task:' + str(i) for i in self.df.index]
         if 'cmd' not in self.df.columns:
             self.df['cmd'] = 'No command'
- 
+
     def synchronized(func):
         def wrapper(self, *args, **kwargs):
             with self._lock:

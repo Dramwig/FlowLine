@@ -1,6 +1,7 @@
 import pynvml
 import time
 import threading
+from functools import cmp_to_key
 
 from flowline.config import config
 from flowline.utils import Log
@@ -39,7 +40,7 @@ class GPU:
         self.gpu_id = gpu_id
         self.info_history = []
         self.info_history_length = 10
-        self.info = []
+        self.info = None
         self.user_process_num = 0
         self.on_flash = on_flash
         self.monitor_interval = 5
@@ -101,9 +102,10 @@ def get_gpu_count():
     return gpu_count
     
 class GPU_Manager:
-    def __init__(self, use_gpu_id: list, on_flash=None):
+    def __init__(self, use_gpu_id: list, on_flash=None, user_cmp=None):
         self._lock = threading.Lock()
         self.all_gpu = [GPU(i, on_flash) for i in range(get_gpu_count())]
+        self.user_cmp = user_cmp
         self.usable_mark = [False] * len(self.all_gpu)
         for gpu_id in use_gpu_id:
             self.usable_mark[gpu_id] = True
@@ -127,25 +129,32 @@ class GPU_Manager:
     def flash_all_gpu(self):
         for gpu in self.all_gpu:
             gpu.flash()
-    
+                
     @synchronized
     def choose_gpu(self):
+        def gpu_priority_cmp(info1: GPU_info, info2: GPU_info):
+            if info1.free_memory > info2.free_memory:
+                return -1
+            elif info1.free_memory < info2.free_memory:
+                return 1
+            else:
+                return 0
+            
         self.flash_all_gpu()
-        choose_gpu = None
-        for gpu in self.all_gpu:
-            if self.usable_mark[gpu.gpu_id]:
-                info = gpu.info
-                if info.free_memory > self.min_process_memory:
-                    if choose_gpu is None:
-                        choose_gpu = gpu
-                        continue
-                    elif info.utilization < choose_gpu.info.utilization:
-                        choose_gpu = gpu
-                    elif info.utilization == gpu.info.utilization:
-                        if info.free_memory > choose_gpu.info.free_memory:
-                            choose_gpu = gpu
-        logger.info(f"GPU_Manager choose_gpu: {choose_gpu}")
-        return choose_gpu.gpu_id if choose_gpu is not None else None
+        if all(not mark for mark in self.usable_mark) or len(self.all_gpu) == 0:
+            return None, []
+        usable_gpus = [
+            (gpu.gpu_id, gpu.info)
+            for gpu, mark in zip(self.all_gpu, self.usable_mark)
+            if mark
+        ]
+        cmp_func = gpu_priority_cmp if self.user_cmp is None else self.user_cmp
+        usable_gpus.sort(key=cmp_to_key(lambda a, b: cmp_func(a[1], b[1])))
+        sorted_gpu_ids = [gpu_id for gpu_id, _ in usable_gpus]
+        logger.info(f"GPU_Manager choose_gpu: {sorted_gpu_ids}")
+        chosen_gpu_id = usable_gpus[0][0] if usable_gpus[0][1].free_memory > self.min_process_memory else None
+        return chosen_gpu_id, sorted_gpu_ids
+        
 
     @synchronized
     def switch_gpu(self, gpu_id):
