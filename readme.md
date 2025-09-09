@@ -116,9 +116,7 @@ if __name__ == "__main__":
 <details>
 <summary>user_cmp 可用参数表</summary>
 
-info1、info2其实是 [gpu.py](.flowline/core/gpu.py) 的 GPU_info 对象的实例，其可用作比较函数的参数有：
-
-可以用一个 Markdown 表格清晰地表示 `GPU_info` 类中每个参数的含义：
+info1、info2其实是 [gpu.py](.flowline/core/gpu.py) 的 `GPU_info` 对象的实例，类中每个参数都可用于比较函数内，分别如下：
 
 | 参数名             | 类型      | 含义说明                                                      |
 | ------------------ | --------- | ------------------------------------------------------------- |
@@ -132,9 +130,6 @@ info1、info2其实是 [gpu.py](.flowline/core/gpu.py) 的 GPU_info 对象的实
 | `temperature`      | int/float | GPU 当前温度（单位通常为摄氏度 °C）                           |
 | `power`            | float     | GPU 当前功耗（单位通常为瓦特 W）                              |
 | `max_power`        | float     | GPU 最大设计功耗（单位瓦特 W）                                |
-
-如果你需要，我可以帮你画一个**可视化示意图**，把 GPU 状态参数和它们的含义一目了然地展示出来，这在文档或汇报中很直观。你希望我画吗？
-
 </details>
 
 <details>
