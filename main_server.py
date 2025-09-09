@@ -3,7 +3,7 @@
 from flowline import get_app
 from flask_cors import CORS
 
-def func(dict, gpu_id):
+def func(dict, gpu_id, sorted_gpu_ids):
     return "CUDA_VISIBLE_DEVICES="+str(gpu_id)+" python -u test/test.py "+ " ".join([f"--{k}={v}" for k, v in dict.items()])
 
 def main():

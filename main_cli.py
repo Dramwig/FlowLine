@@ -3,7 +3,6 @@
 from flowline import run_cli
 
 def func(dict, gpu_id, sorted_gpu_ids):
-    print(sorted_gpu_ids)
     return "CUDA_VISIBLE_DEVICES="+str(gpu_id)+" python -u test/test.py "+ " ".join([f"--{k} {v}" for k, v in dict.items()])
 
 def cmp(info1, info2):
