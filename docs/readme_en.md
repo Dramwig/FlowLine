@@ -1,3 +1,5 @@
+<!-- v0.1.2 -->
+
 <div align="center">
   <img src="./fig/logo.png" width="50%" alt="FlowLine" />
 
@@ -51,7 +53,7 @@ The system uses a list file (`.xlsx`、 `.csv` or `.json` format) to define task
 <details>
 <summary>Example and Explanation</summary>
 
-Example files: [`test/todo.xlsx`](./test/todo.xlsx), [`test/todo.csv`](./test/todo.csv),[`test/todo.json`](./test/todo.json), which can be constructed using the example program [`test/task_builder.py`](./test/task_builder.py).
+Example files: [`test/example1_todo.xlsx`](./test/example1_todo.xlsx), [`test/example1_todo.csv`](./test/example1_todo.csv),[`test/example1_todo.json`](./test/example1_todo.json), which can be constructed using the example program [`test/task_builder.py`](./test/task_builder.py).
 
 | *name*    | lr    | batch_size | *run_num* | *need_run_num* | *cmd*       |
 | --------- | ----- | ---------- | --------- | -------------- | ----------- |
@@ -88,7 +90,7 @@ if __name__ == "__main__":
         args = " ".join([f"--{k} {v}" for k, v in param_dict.items()])
         return cmd + args
 
-    run_cli(func, "test/todo.xlsx")
+    run_cli(func, "test/example1_todo.xlsx")
 ```
 
 * `param_dict`: Dictionary built from current Excel row (keys=column names, values=cell content)
@@ -182,7 +184,7 @@ Besides CLI, you can use the Web GUI for **real-time monitoring and dynamic inte
 #### 1. Start Backend API Service
 Run the Flask backend:
 ```bash
-python main_server.py
+python test/example_server.py
 ```
 
 #### 2. Start Frontend Service

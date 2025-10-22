@@ -1,4 +1,4 @@
-<!-- # FlowLine -->
+<!-- v0.1.3 -->
 
 <div align="center">
   <img src="./docs/fig/logo.png" width="50%" alt="FlowLine" />
@@ -29,9 +29,11 @@ FlowLine 是一个用于 **GPU资源管理** 和 **并发指令流调度** 的�
 
 ## Updates
 
-* 2025.09.09: 新增用户自定义 GPU 优先级排序功能，通过 `user_cmp` 参数传入自定义排序函数，详见 [main_cli.py](./main_cli.py) 示例。
+* 2025.09.09: 新增用户自定义 GPU 优先级排序功能，通过 `user_cmp` 参数传入自定义排序函数，详见 [example1_cli.py](./test/example1_cli.py) 示例。
 
 ## 🚀 快速使用指南
+
+> 更精炼的， [example.sh](./example.sh) 给出了所有示例。
 
 ### 🖥️ 使用命令行接口（CLI 模式）
 
@@ -51,7 +53,7 @@ pip install fline
 pip install -e <flowline库路径>
 ```
 
-> 注：请确保你已安装 `pandas`、`psutil`、`openpyxl` 等`requirements.txt`内的基本依赖。
+> 注：请确保你已安装 `pandas`、`psutil`、`openpyxl` 等`requirements.txt`内的基本依赖。如果只用 CLI 方式可以不用安装 flash 相关包。
 
 #### 2. 编写任务控制表
 
@@ -60,7 +62,7 @@ pip install -e <flowline库路径>
 <details>
 <summary>示例和说明</summary>
 
-示例文件：[`test/todo.xlsx`](./test/todo.xlsx)、[`test/todo.csv`](./test/todo.csv)、[`test/todo.json`](./test/todo.json)， 可以通过运行[`test/task_builder.py`](./test/task_builder.py)示例构造程序构造。
+示例文件：[`test/example1_todo.xlsx`](./test/example1_todo.xlsx)、[`test/example1_todo.csv`](./test/example1_todo.csv)、[`test/example1_todo.json`](./test/example1_todo.json)， 可以通过运行[`test/task_builder.py`](./test/task_builder.py)示例构造程序构造。
 
 | *name*    | lr    | batch\_size |*run\_num*|*need\_run\_num*| *cmd*       |
 | --------- | ----- | ----------- | -------- | -------------- | ----------- |
@@ -88,25 +90,17 @@ pip install -e <flowline库路径>
 <details>
 <summary>示例和说明</summary>
 
-详见 [main_cli.py](./main_cli.py) 示例。主要部分如下：
+详见 [example1_cli.py](./test/example1_cli.py) 示例。主要部分如下：
 
 ```python
 def func(dict, gpu_id, sorted_gpu_ids):
-    print(sorted_gpu_ids)
     return "CUDA_VISIBLE_DEVICES="+str(gpu_id)+" python -u test/test.py "+ " ".join([f"--{k} {v}" for k, v in dict.items()])
 
-def cmp(info1, info2):
-    if info1.free_memory > info2.free_memory:
-        return -1
-    elif info1.free_memory < info2.free_memory:
-        return 1
-    else:
-        return 0
-
 if __name__ == "__main__":
-    # run_cli(func, "test/todo.csv") 
-    run_cli(func, "test/todo.csv", user_cmp=cmp) # user_cmp可选
+    run_cli(func, "test/example1_todo.xlsx") 
 ```
+
+对于直接执行完整命令的需求，见 [example2_cli.py](./test/example2_cli.py)。
 
 * `dict` 是由 Excel 中当前任务行构造出的字典，键为列名，值为单元格内容；
 * `gpu_id` 是系统动态分配的 GPU 编号，保证任务不冲突，其此刻一定满足显存空间最小限制；
@@ -161,10 +155,10 @@ log/
 
 #### 4. 运行程序后输入`run`开始运行任务流
 
-运行 `main_cli.py` 启动程序：
+运行 `example1_cli.py` 启动程序：
 
 ```bash
-python main_cli.py
+python test/example1_cli.py
 ```
 
 <details>
@@ -227,10 +221,10 @@ python main_cli.py
 
 ### 1. 启动后端 API 服务
 
-后端为 Flask 应用，运行 `main_server.py` 启动服务：
+后端为 Flask 应用，运行 `example_server.py` 启动服务：
 
 ```bash
-python main_server.py
+python test/example_server.py
 ```
 
 ### 2. 启动前端界面服务

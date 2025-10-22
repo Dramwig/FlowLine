@@ -10,10 +10,11 @@ def main():
     """前后端分离
 
     仅提供API
-    前端静态文件需要通过单独的命令提供：
-    cd web && python -m http.server 8000
+        !!!! 前端静态文件需要通过单独的命令提供：
+        !!!! cd web && python -m http.server 8000
     """
-    app = get_app(func, "test/todo.xlsx")
+    # ! 这里需要修改为你的任务配置文件路径
+    app = get_app(func, "test/example1_todo.xlsx")
     CORS(app)
     app.run(host='0.0.0.0', port=5000, debug=True)
 

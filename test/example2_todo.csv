@@ -1,0 +1,13 @@
+description,mycmd,run_num,need_run_num,name,cmd
+Resnet50+自蒸馏 weather训练,python train.py train multi_resnet50_kd --data-dir /home/me/datasets/weather --dataset weather --batch-size 4 --print-freq 100 --lr 0.02  --use-self False,0,1,Task:0,No command
+Resnet50+自蒸馏 weather训练,python train.py train multi_resnet50_kd --data-dir /home/me/datasets/weather --dataset weather --batch-size 4 --print-freq 100 --lr 0.02,0,1,Task:1,No command
+Resnet50+频域Attention weather训练,python train.py train Spec_Resnet50_kd --data-dir /home/me/datasets/weather --dataset weather --batch-size 4 --print-freq 100 --use-self False  --lr 0.02,0,1,Task:2,No command
+Ours-small weather训练 （Resnet50+频域Attention+自蒸馏）,python train.py train Spec_Resnet50_kd --data-dir /home/me/datasets/weather --dataset weather --batch-size 4 --print-freq 100 --lr 0.001 --alpha 0.1  --temperature  1,0,1,Task:3,No command
+Resnet101+自蒸馏 weather训练,python train.py train multi_resnet101_kd --data-dir /home/me/datasets/weather --dataset weather --batch-size 4 --print-freq 100 --lr 0.02  --use-self False,0,1,Task:4,No command
+Resnet101+自蒸馏 weather训练,python train.py train multi_resnet101_kd --data-dir /home/me/datasets/weather --dataset weather --batch-size 4 --print-freq 100  --lr 0.02,0,1,Task:5,No command
+Resnet101+频域Attention weather训练,python train.py train Spec_Resnet101_kd --data-dir /home/me/datasets/weather --dataset weather --batch-size 4 --print-freq 100 --use-self False  --lr 0.001,0,1,Task:6,No command
+Ours-base weather训练,python train.py train Spec_Resnet101_kd --data-dir /home/me/datasets/weather --dataset weather --batch-size 4 --print-freq 100 --lr 0.005,0,1,Task:7,No command
+Resnet152+自蒸馏 weather训练,python train.py train multi_resnet152_kd --data-dir /home/me/datasets/weather --dataset weather --batch-size 4 --print-freq 100  --lr 0.02  --use-self False,0,1,Task:8,No command
+Resnet152+自蒸馏 weather训练,python train.py train multi_resnet152_kd --data-dir /home/me/datasets/weather --dataset weather --batch-size 4 --print-freq 100  --lr 0.02,0,1,Task:9,No command
+Resnet152+频域Attention weather训练,python train.py train Spec_Resnet152_kd --data-dir /home/me/datasets/weather --dataset weather --batch-size 4 --print-freq 100 --lr 0.001  --use-self False,0,1,Task:10,No command
+Ours-large weather训练,python train.py train Spec_Resnet152_kd --data-dir /home/me/datasets/weather --dataset weather --batch-size 4 --print-freq 100 --lr 0.001,0,1,Task:11,No command

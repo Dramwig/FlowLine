@@ -1,3 +1,10 @@
+# 任务生成器示例：用于生成任务配置，这里生成了 example1
+#
+# TODO：
+#   - 修改 config_generator() 函数，生成任务配置
+#   - 修改 todo_file_path 为保存任务配置的文件路径（.csv, .xlsx, .json）
+
+
 import os
 from tqdm import tqdm
 import pandas as pd
@@ -6,9 +13,7 @@ current_path = os.path.dirname(os.path.abspath(__file__))
 todo_file_path = os.path.join(current_path, "todo.csv") # `.csv` or `.xlsx` or `.json`
 
 def config_generator():
-    """
-    A generator function that yields configuration parameters.
-    """
+    # ！！！ 修改这里，生成任务配置
     configs = {
         "data_name": ["rotate_mnist", "color_mnist", "portraits"],
         "model_name": ["cnn", "vgg", "resnet"],
@@ -37,31 +42,6 @@ def process_configs():
     # Create DataFrame from generator
     configs = list(config_generator())
     df = pd.DataFrame(configs)
-    
-    # Add 'is_run' column initialized to False
-    df['run_num'] = 0
-    
-    # Save to Excel if file doesn't exist, otherwise load and update
-    if os.path.exists(todo_file_path):
-        existing_df = pd.read_excel(todo_file_path)
-        df = df.merge(existing_df[['data_name', 'model_name', 'method_name', 'domain_num', 'seed', 'run_num']], 
-                      on=['data_name', 'model_name', 'method_name', 'domain_num', 'seed', 'run_num'], 
-                      how='left')
-        # print(df)
-        df['run_num'] = df['run_num'].fillna(0)
-    
-    # Process only unrun configurations
-    for config in tqdm(configs):
-        if not df[(df['data_name'] == config['data_name']) & 
-                  (df['model_name'] == config['model_name']) & 
-                  (df['method_name'] == config['method_name']) & 
-                  (df['domain_num'] == config['domain_num']) & 
-                  (df['seed'] == config['seed'])]['run_num'].iloc[0]:
-            df.loc[(df['data_name'] == config['data_name']) & 
-                   (df['model_name'] == config['model_name']) & 
-                   (df['method_name'] == config['method_name']) & 
-                   (df['domain_num'] == config['domain_num']) & 
-                   (df['seed'] == config['seed']), 'run_num'] = 0
     
     # Save to Excel or CSV
     if todo_file_path.endswith(".xlsx"):
