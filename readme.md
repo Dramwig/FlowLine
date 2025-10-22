@@ -91,6 +91,8 @@ pip install -e <flowline库路径>
 详见 [example1_cli.py](./test/example1_cli.py) 示例。主要部分如下：
 
 ```python
+from flowline.api import run_cli
+
 def func(dict, gpu_id, sorted_gpu_ids):
     return "CUDA_VISIBLE_DEVICES="+str(gpu_id)+" python -u test/test.py "+ " ".join([f"--{k} {v}" for k, v in dict.items()])
 
@@ -219,6 +221,8 @@ python test/example1_cli.py
 ```bash
 python test/example_server.py
 ```
+
+> 注：Web 界面使用 `from flowline.api.routes import get_app` 导入路由。
 
 ### 2. 启动前端界面服务
 

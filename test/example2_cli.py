@@ -6,6 +6,6 @@ def func(dict, gpu_id, sorted_gpu_ids):
     return "CUDA_VISIBLE_DEVICES="+str(gpu_id)+" "+dict["mycmd"]+" --discribe "+'"'+dict["description"]+'"'
 
 if __name__ == "__main__":
-    run_cli(func, "trash/todo.csv") 
+    run_cli(func, "test/example2_todo.csv") 
     
 # 如果出现异常进程，可以使用 pkill -9 python 杀死所有进程

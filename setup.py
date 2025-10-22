@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 import os
 
-base_version = "0.1.2"
+base_version = "0.1.3"
 build_timestamp = os.getenv('BUILD_TIMESTAMP', None)
 
 if build_timestamp:

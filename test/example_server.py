@@ -1,6 +1,6 @@
 # api+web 分离式服务器示例
 
-from flowline import get_app
+from flowline.api.routes import get_app
 from flask_cors import CORS
 
 def func(dict, gpu_id, sorted_gpu_ids):

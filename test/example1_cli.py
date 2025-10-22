@@ -1,5 +1,5 @@
 # 命令行调用示例
-from flowline import run_cli
+from flowline.api import run_cli
 
 def func(dict, gpu_id, sorted_gpu_ids):
     # ! 这里需要修改为你的命令

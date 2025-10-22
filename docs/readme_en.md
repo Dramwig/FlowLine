@@ -1,4 +1,4 @@
-<!-- v0.1.2 -->
+<!-- v0.1.3 -->
 
 <div align="center">
   <img src="./fig/logo.png" width="50%" alt="FlowLine" />
@@ -27,6 +27,8 @@ The system was designed to replace the inefficient manual process of monitoring 
 * Dual interaction modes: CLI for scripted control and batch deployment on Linux servers; Web GUI for visual task monitoring, status tracking, and real-time intervention.
 
 ## 🚀 Quick Start Guide
+
+> For a concise demonstration, see [example.sh](./example.sh) which provides all usage examples.
 
 ### 🖥️ Using Command Line Interface (CLI Mode)
 
@@ -82,7 +84,7 @@ You need to define a custom function that constructs the final command string us
 
 Example:
 ```python
-from flowline import run_cli
+from flowline.api import run_cli
 
 if __name__ == "__main__":
     def func(param_dict, gpu_id):
@@ -186,6 +188,8 @@ Run the Flask backend:
 ```bash
 python test/example_server.py
 ```
+
+> Note: Web interface uses `from flowline.api.routes import get_app` to import routes.
 
 #### 2. Start Frontend Service
 Launch static file server:
